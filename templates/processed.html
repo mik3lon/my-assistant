@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process PDFs</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+        <h1 class="text-2xl font-semibold mb-4 text-center">Documents Processed</h1>
+
+        <!-- Flash Messages -->
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <p class="text-green-500 font-medium">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="mt-4 text-center">
+            <p class="text-gray-700">Your documents have been successfully processed.</p>
+        </div>
+
+        <!-- Back to Upload Page Button -->
+        <div class="mt-6">
+            <a href="{% url 'upload_files' %}" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-all">
+                Back to Upload Page
+            </a>
+        </div>
+    </div>
+</body>
+</html>

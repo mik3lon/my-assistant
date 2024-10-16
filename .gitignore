@@ -1,0 +1,97 @@
+# Python compiled files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+ENV/
+venv.bak/
+.env
+
+# Django specific
+*.log
+local_settings.py
+db.sqlite3
+/db.sqlite3-journal
+
+# Media uploads (if you don't want to track uploaded files)
+media/
+staticfiles/
+
+# Ignore static files that are dynamically built
+/static/
+!static/*.keep
+
+# Ignore cache, session and storage files
+*.pot
+*.mo
+*.py[co]
+*.pyo
+
+# Ignore IDE specific settings
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# pipenv, poetry, pyenv, etc.
+Pipfile
+Pipfile.lock
+poetry.lock
+poetry.toml
+.pyenv/
+
+# Compiled C extensions
+*.so
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Celery beat schedule files
+celerybeat-schedule
+
+# Coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
+
+# Pyre
+.pyre/
