@@ -14,15 +14,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
-from . import views  # Import the views from the current folder
+from django.urls import path, include
+from . import upload_docs  # Import the views from the current folder
+from . import process_docs  # Import the views from the current folder
+from . import main  # Import the views from the current folder
 from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path('', views.upload_files, name='upload_files'),
-    path('process-docs/', views.process_docs, name='process_docs'),
+    path('dashboard', upload_docs.index, name='upload_files'),
+    path('dashboard/process-docs/', process_docs.index, name='process_docs'),
+
+    path('', main.main_view, name='main'),
+
+    path('accounts/', include('allauth.urls')),
+    path('accounts/', include('allauth.socialaccount.urls')),
 ]
 
 if settings.DEBUG:

@@ -1,9 +1,20 @@
-# views.py
-from django.shortcuts import render, redirect
-from django.core.files.storage import FileSystemStorage
-from django.contrib import messages
+# upload_docs.py
+import os
 
-def upload_files(request):
+from django.contrib import messages
+from django.core.files.storage import FileSystemStorage
+from django.shortcuts import render
+from dotenv import load_dotenv, find_dotenv
+from qdrant_client import QdrantClient
+
+# Load environment variables
+_ = load_dotenv(find_dotenv())
+
+OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+qdrant_client = QdrantClient("localhost", port=6333)  # Adjust to your Qdrant configuration
+collection_name = "my_collection"
+
+def index(request):
     if request.method == 'POST' and request.FILES.getlist('uploaded_files'):
         fs = FileSystemStorage()
         file_urls = []
@@ -16,8 +27,3 @@ def upload_files(request):
         return render(request, 'upload.html', {'file_urls': file_urls})
 
     return render(request, 'upload.html')
-
-def process_docs(request):
-    # Logic to process the uploaded documents
-    messages.success(request, 'Documents processed successfully!')
-    return render(request, 'processed.html')

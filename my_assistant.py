@@ -19,54 +19,50 @@ _ = load_dotenv(find_dotenv())
 
 OPENAI_API_KEY=os.environ['OPENAI_API_KEY']
 
-loaders = [
-    PyPDFLoader("./Data/acta.pdf")
-]
-
 if __name__ == "__main__":
     collection_name = "my_collection"
-    pages = []
-    for loader in loaders:
-        pages.extend(loader.load())
-
-    # Split documents
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=150,
-        length_function=len
-    )
-
-    docs = text_splitter.split_documents(pages)
+    # pages = []
+    # for loader in loaders:
+    #     pages.extend(loader.load())
     #
-    # # Create embeddings using OpenAI
+    # # Split documents
+    # text_splitter = CharacterTextSplitter(
+    #     separator="\n",
+    #     chunk_size=1000,
+    #     chunk_overlap=150,
+    #     length_function=len
+    # )
+    #
+    # docs = text_splitter.split_documents(pages)
+    # #
+    # # # Create embeddings using OpenAI
     embeddings_model = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model="text-embedding-ada-002")
-    #
-    # # Generate embeddings for multiple documents using embed_documents
-    vectors = embeddings_model.embed_documents([doc.page_content for doc in docs])
-    #
-    # # Initialize the Qdrant client (local or remote connection)
+    # #
+    # # # Generate embeddings for multiple documents using embed_documents
+    # vectors = embeddings_model.embed_documents([doc.page_content for doc in docs])
+    # #
+    # # # Initialize the Qdrant client (local or remote connection)
     qdrant_client = QdrantClient("localhost", port=6333)  # If you're running locally, adjust for your host
-
-    # Define collection parameters
-    if not qdrant_client.collection_exists(collection_name=collection_name):
-        qdrant_client.create_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=len(vectors[0]), distance=Distance.COSINE),
-        )
-
-    # Upload documents to Qdrant
-    points = [
-        PointStruct(id=i, vector=vector, payload={"page_content": docs[i].page_content})
-        for i, vector in enumerate(vectors)
-    ]
-
-    qdrant_client.upsert(
-        collection_name=collection_name,
-        points=points,
-    )
-
-    print(f"Inserted {len(points)} documents into Qdrant!")
+    #
+    # # Define collection parameters
+    # if not qdrant_client.collection_exists(collection_name=collection_name):
+    #     qdrant_client.create_collection(
+    #         collection_name=collection_name,
+    #         vectors_config=VectorParams(size=len(vectors[0]), distance=Distance.COSINE),
+    #     )
+    #
+    # # Upload documents to Qdrant
+    # points = [
+    #     PointStruct(id=i, vector=vector, payload={"page_content": docs[i].page_content})
+    #     for i, vector in enumerate(vectors)
+    # ]
+    #
+    # qdrant_client.upsert(
+    #     collection_name=collection_name,
+    #     points=points,
+    # )
+    #
+    # print(f"Inserted {len(points)} documents into Qdrant!")
 
     qdrant = Qdrant(qdrant_client, collection_name, embeddings_model)
     retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": 6})
@@ -120,7 +116,7 @@ if __name__ == "__main__":
     chat_history = []
 
     # First question
-    question = "¿En que fecha se celebró la reunion?"
+    question = "¿Puedes listarme las votaciones del chalet 1?"
 
     results = retriever.get_relevant_documents(question)
 
@@ -147,10 +143,3 @@ if __name__ == "__main__":
     chat_history.extend([HumanMessage(content=question), ai_msg_1["answer"]])
 
     print(ai_msg_1["answer"])
-
-    # Second question
-    second_question = "¿Se aprobó la retirada del candado en el boton de apertura de la puerta para coches? ¿Con que porcentaje?"
-
-    ai_msg_2 = rag_chain.invoke({"input": second_question, "chat_history": chat_history})
-    print(ai_msg_2["answer"])
-
