@@ -1,5 +1,9 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -33,6 +37,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+
+    'myproject'
 ]
 
 MIDDLEWARE = [
@@ -54,7 +60,7 @@ ROOT_URLCONF = 'myproject.urls'
 SITE_ID = 1
 
 # Redirect URLs after login/logout
-LOGIN_REDIRECT_URL = '/dashboard'
+LOGIN_REDIRECT_URL = '/upload-files'
 LOGOUT_REDIRECT_URL = '/'
 
 # Configure authentication backends to use allauth
@@ -139,8 +145,8 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'APP': {
-            'client_id': "638067943438-p6urhm37v8l7vms8a9gnj5vagshc9lco.apps.googleusercontent.com",
-            'secret': "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",
+            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
             'key': ''
         },
         'AUTH_PARAMS': {
@@ -159,3 +165,5 @@ ACCOUNT_USERNAME_REQUIRED = False  # Disable username field if you only want ema
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development only, use console backend
 ACCOUNT_SIGNUP_REDIRECT_URL = None  # Ensure this isn't set to redirect before the user is created
+
+CSRF_FAILURE_VIEW = 'myproject.csrf_failure.custom_csrf_failure_view'

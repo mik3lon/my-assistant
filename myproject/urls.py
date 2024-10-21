@@ -1,32 +1,20 @@
-"""
-URL configuration for myproject project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.urls import path, include
-from . import upload_docs  # Import the views from the current folder
-from . import process_docs  # Import the views from the current folder
-from . import main  # Import the views from the current folder
+from . import upload_files
+from . import process_docs
+from . import index
+from . import serve_file
 from django.conf.urls.static import static
 from django.conf import settings
 
-urlpatterns = [
-    # path('admin/', admin.site.urls),
-    path('dashboard', upload_docs.index, name='upload_files'),
-    path('dashboard/process-docs/', process_docs.index, name='process_docs'),
+from .delete_file import delete_file
 
-    path('', main.main_view, name='main'),
+urlpatterns = [
+    path('', index.index, name='main'),
+
+    path('upload-files/', upload_files.upload_file, name='upload_file'),
+    path('process-docs/', process_docs.index, name='process_docs'),
+    path('delete-file/<int:file_id>/', delete_file, name='delete_file'),
+    path('media/file/<int:file_id>/', serve_file.serve_protected_file, name='serve_protected_file'),
 
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('allauth.socialaccount.urls')),

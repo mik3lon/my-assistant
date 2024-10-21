@@ -1,15 +1,16 @@
-# upload_docs.py
+# upload_files.py
 import os
 
 from django.conf import settings
 from django.http import JsonResponse
 from dotenv import load_dotenv, find_dotenv
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct
 from qdrant_client.models import Distance, VectorParams
+from django.contrib.auth.decorators import login_required
 
 # Load environment variables
 _ = load_dotenv(find_dotenv())
@@ -18,6 +19,8 @@ OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 qdrant_client = QdrantClient("localhost", port=6333)  # Adjust to your Qdrant configuration
 collection_name = "my_collection"
 
+
+@login_required
 def index(request):
     if request.method == 'POST':
         # Define the folder where files are stored
