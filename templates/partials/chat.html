@@ -1,0 +1,103 @@
+<div class="rounded-lg border border-gray-200 p-4"> <!-- Darker border added -->
+    <h2 class="text-lg font-semibold mb-2 text-left">Chat with my files</h2>
+    <!-- Chat Messages -->
+    <div id="chat-messages" class="flex-1 p-4 overflow-y-auto">
+        <!-- Example message bubbles will be dynamically added here -->
+    </div>
+
+    <!-- Input Area Fixed at the Bottom -->
+    <div class="p-4 sticky bottom-0 bg-white">
+        <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 shadow-lg">
+            <!-- User Input -->
+            <input id="chat-input" type="text" placeholder="Envía un mensaje a ChatGPT" class="flex-1 bg-transparent focus:outline-none text-gray-800 placeholder-gray-500">
+            <!-- Send Button -->
+            <button id="send-button" class="ml-4 p-2 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition duration-200">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let conversationId = null; // Initialize conversationId as null
+
+    document.getElementById('send-button').addEventListener('click', sendMessage);
+    document.getElementById('chat-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        const chatInput = document.getElementById('chat-input');
+        const message = chatInput.value.trim();
+
+        if (!message) return; // Don't send an empty message
+
+        // Add user message to the chat
+        addMessageToChat(message, 'user');
+
+        // Clear input field
+        chatInput.value = '';
+
+        // Prepare the data to send, including conversation_id if it exists
+        const payload = {
+            question: message,
+            conversation_id: conversationId // Include conversationId if it's set
+        };
+
+        // Send the message to the interact service
+        fetch('/interact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken() // Include CSRF token if needed
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response) {
+                    // Add the AI response to the chat
+                    addMessageToChat(data.response, 'ai');
+
+                    // If this is the first interaction, store the conversation_id for future messages
+                    if (!conversationId && data.conversation_id) {
+                        conversationId = data.conversation_id;
+                    }
+                } else if (data.error) {
+                    addMessageToChat('Error: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                addMessageToChat('Error: ' + error, 'error');
+            });
+    }
+
+    function addMessageToChat(content, sender) {
+        const chatMessages = document.getElementById('chat-messages');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('mb-4');
+
+        if (sender === 'user') {
+            messageElement.innerHTML = `<div class="bg-blue-600 text-white rounded-md p-3 w-fit max-w-xl ml-auto">${content}</div>`;
+            messageElement.classList.add('text-right');
+        } else if (sender === 'ai') {
+            messageElement.innerHTML = `<div class="bg-gray-200 rounded-md p-3 w-fit max-w-xl">${content}</div>`;
+        } else if (sender === 'error') {
+            messageElement.innerHTML = `<div class="bg-red-600 text-white rounded-md p-3 w-fit max-w-xl">${content}</div>`;
+        }
+
+        chatMessages.appendChild(messageElement);
+
+        // Scroll to the bottom of the chat
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+        return cookieValue ? cookieValue.split('=')[1] : '';
+    }
+</script>
