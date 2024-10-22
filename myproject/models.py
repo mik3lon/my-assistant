@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 import uuid
 from django.contrib.auth.models import User
@@ -12,6 +14,14 @@ class UserFile(models.Model):
     length = models.IntegerField()
     file_type = models.CharField(max_length=50)
     upload_date = models.DateTimeField(auto_now_add=True)
+
+    def delete(self, *args, **kwargs):
+        # First delete the file from the filesystem
+        if self.file:
+            if os.path.isfile(self.file.path):
+                os.remove(self.file.path)
+        # Then delete the object from the database
+        super().delete(*args, **kwargs)
 
 class Conversation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
