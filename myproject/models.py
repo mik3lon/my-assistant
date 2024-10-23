@@ -14,6 +14,7 @@ class UserFile(models.Model):
     length = models.IntegerField()
     file_type = models.CharField(max_length=50)
     upload_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='PENDING')
 
     def delete(self, *args, **kwargs):
         # First delete the file from the filesystem

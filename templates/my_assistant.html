@@ -3,45 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload PDF Documents</title>
-    <!-- Tailwind CSS CDN -->
+    <title>My assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Add Alpine.js for dynamic interactions -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        [x-cloak] {
-            display: none !important;
+        /* Custom styling for active tab */
+        .tab-active {
+            background-color: white;
+            color: #4f46e5; /* Indigo color */
+            font-weight: bold;
+            border-bottom: 2px solid #4f46e5; /* Indigo bottom border */
+        }
+
+        /* Tab hover effect */
+        .tab-hover:hover {
+            background-color: #f1f5f9;
         }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex items-center justify-center">
+<body class="bg-gray-50">
+<div class="container mx-auto mt-16 p-6 bg-white shadow-lg rounded-lg max-w-8xl">
+    {% include 'partials/messages.html' with messages=messages %}
+    <!-- Tab navigation -->
+    <div class="flex justify-center space-x-8 border-b border-gray-200">
+        <button id="tab1" class="tab-active px-6 py-3 transition-colors duration-300 focus:outline-none tab-hover"
+                onclick="showContent('content1')">My knowledge
+        </button>
+        <button id="tab2" class="px-6 py-3 transition-colors duration-300 focus:outline-none tab-hover"
+                onclick="showContent('content2')">Chat
+        </button>
+    </div>
+    {% include 'partials/messages.html' with messages=messages %}
 
-<div x-show="loading" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="flex flex-col items-center space-y-2">
-        <!-- Spinner -->
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
-        <!-- Loading Text -->
-        <p class="text-white text-lg">Loading files...</p>
+    <!-- Content area -->
+    <div class="p-6 mt-8 ">
+        <div id="content1" class="tab-content">
+            <div class="w-full flex space-x-8">
+                {% include 'partials/file_list.html' with user_files=user_files %}
+                {% include 'partials/upload_form.html' with user_files=user_files %}
+            </div>
+        </div>
+
+        <div id="content2" class="tab-content hidden">
+            <div class="w-full">
+                {% include 'partials/chat.html' with message_text="Hello from the partial view!" %}
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="w-full max-w-6xl bg-white p-6 rounded-lg shadow-lg space-y-8">
-    <div class="w-full flex space-x-8">
-        {% include 'partials/messages.html' with messages=messages %}
-        {% include 'partials/file_list.html' with user_files=user_files %}
-        {% include 'partials/upload_form.html' with user_files=user_files %}
-    </div>
-    <div class="w-full">
-        {% include 'partials/chat.html' with message_text="Hello from the partial view!" %}
-    </div>
-</div>
+<script>
+    // JavaScript function to switch between tabs
+    function showContent(contentId) {
+        // Hide all contents
+        document.querySelectorAll('.tab-content').forEach(function(content) {
+            content.classList.add('hidden');
+        });
 
+        // Remove active class from all tabs
+        document.querySelectorAll('button').forEach(function(tab) {
+            tab.classList.remove('tab-active');
+        });
 
+        // Show the selected content
+        document.getElementById(contentId).classList.remove('hidden');
 
-
-
+        // Add active class to the clicked tab
+        const activeTab = document.querySelector(`[onclick="showContent('${contentId}')"]`);
+        activeTab.classList.add('tab-active');
+    }
+</script>
 <!-- Alpine.js File Upload Handler -->
 <script>
     function fileUploadHandler() {
@@ -57,32 +91,6 @@
 
             removeFile(index) {
                 this.files.splice(index, 1);
-            },
-
-            async processDocuments() {
-                this.loading = true;  // Show the loading overlay
-
-                try {
-                    const response = await fetch("{% url 'process_docs' %}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'Content-Type': 'application/json',
-                        },
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.showToast(data.message);
-                    } else {
-                        const errorData = await response.json();
-                        this.showToast(errorData.error, true);
-                    }
-                } catch (error) {
-                    this.showToast("Error processing documents.", true);
-                } finally {
-                    this.loading = false;  // Hide the loading overlay
-                }
             },
 
             async submitFiles() {
@@ -163,6 +171,5 @@
         });
     });
 </script>
-
 </body>
 </html>

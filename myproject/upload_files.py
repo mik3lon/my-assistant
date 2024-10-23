@@ -1,9 +1,11 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages  # Import messages for success or error notifications
+from django.contrib import messages
 import mimetypes
 from myproject.models import UserFile
+from myproject.tasks import process_uploaded_file  # Import Celery task
+
 
 @login_required
 def upload_file(request):
@@ -38,13 +40,17 @@ def upload_file(request):
             user_file.save()
             uploaded_count += 1
 
+            # Trigger Celery task to process the uploaded file asynchronously
+            process_uploaded_file.delay(user_file.id)
+
         # Provide feedback based on the number of files uploaded and skipped
         if uploaded_count > 0:
-            messages.success(request, f'{uploaded_count} file(s) uploaded successfully!')
+            messages.success(request, f'{uploaded_count} file(s) uploaded successfully and are being processed.')
         if skipped_count > 0:
             messages.warning(request, f'{skipped_count} file(s) were skipped because they already exist.')
 
-        return JsonResponse({'status': 'success', 'message': 'File uploaded successfully!'})
+        return JsonResponse({'status': 'success', 'message': 'File uploaded successfully and processing started.'})
+
     else:
         # Fetch all files uploaded by the user
         user_files = UserFile.objects.filter(user=request.user)

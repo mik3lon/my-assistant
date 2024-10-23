@@ -60,7 +60,7 @@ ROOT_URLCONF = 'myproject.urls'
 SITE_ID = 1
 
 # Redirect URLs after login/logout
-LOGIN_REDIRECT_URL = '/upload-files'
+LOGIN_REDIRECT_URL = '/my-assistant'
 LOGOUT_REDIRECT_URL = '/'
 
 # Configure authentication backends to use allauth
@@ -167,3 +167,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 ACCOUNT_SIGNUP_REDIRECT_URL = None  # Ensure this isn't set to redirect before the user is created
 
 CSRF_FAILURE_VIEW = 'myproject.csrf_failure.custom_csrf_failure_view'
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', '')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', '')

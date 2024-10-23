@@ -10,6 +10,18 @@ services:
       QDRANT__SERVICE__GRPC_PORT: 6334
       QDRANT__LOG_LEVEL: "info"
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]  # Enable persistence
+    restart: always
+
 volumes:
   qdrant_storage:
+    driver: local
+  redis_data:
     driver: local

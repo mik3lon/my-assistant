@@ -10,17 +10,17 @@ help:
 
 # Commands for Qdrant
 up: ## Start the Qdrant container
-	docker compose -f docker-compose.yaml up -d qdrant
+	docker compose -f docker-compose.yaml up -d qdrant redis
 
 down: ## Stop and remove the Qdrant container
-	docker compose -f docker-compose.yaml down qdrant
+	docker compose -f docker-compose.yaml down qdrant redis
 
 restart: ## Restart the Qdrant container
-	docker compose -f docker-compose.yaml down qdrant
-	docker compose -f docker-compose.yaml up -d qdrant
+	docker compose -f docker-compose.yaml down qdrant redis
+	docker compose -f docker-compose.yaml up -d qdrant redis
 
 logs: ## Follow the logs of the Qdrant container
-	docker compose -f docker-compose.yaml logs -f qdrant
+	docker compose -f docker-compose.yaml logs -f qdrant redis
 
 ps: ## List running containers
 	docker compose -f docker-compose.yaml ps
@@ -41,4 +41,10 @@ django-shell: ## Open a shell in the Django application
 django-create-superuser: ## Create a superuser for the Django application
 	python3 manage.py createsuperuser
 
+django-make-migrations: ## Make migrations
+	python3 manage.py makemigrations
+
+
 .PHONY: up down restart logs ps clean help django-run django-migrate django-shell django-create-superuser
+
+
