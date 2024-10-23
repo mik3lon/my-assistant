@@ -30,33 +30,32 @@
     <!-- Tab navigation -->
     <div class="flex justify-center space-x-8 border-b border-gray-200">
         <button id="tab1" class="tab-active px-6 py-3 transition-colors duration-300 focus:outline-none tab-hover"
-                onclick="showContent('content1')">My knowledge
+                onclick="showContent('base-knowledge')">My knowledge
         </button>
         <button id="tab2" class="px-6 py-3 transition-colors duration-300 focus:outline-none tab-hover"
-                onclick="showContent('content2')">Chat
+                onclick="showContent('chat')">Chat
         </button>
     </div>
     {% include 'partials/messages.html' with messages=messages %}
 
     <!-- Content area -->
     <div class="p-6 mt-8 ">
-        <div id="content1" class="tab-content">
+        <div id="base-knowledge" class="tab-content">
             <div class="w-full flex space-x-8">
                 {% include 'partials/file_list.html' with user_files=user_files %}
                 {% include 'partials/upload_form.html' with user_files=user_files %}
             </div>
         </div>
 
-        <div id="content2" class="tab-content hidden">
-            <div class="w-full">
-                {% include 'partials/chat.html' with message_text="Hello from the partial view!" %}
+        <div id="chat" class="tab-content hidden">
+            <div class="w-full h-[70vh] flex flex-col"> <!-- 80% of viewport height and flex for layout -->
+                {% include 'partials/chat.html' with conversations=conversations %}
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // JavaScript function to switch between tabs
     function showContent(contentId) {
         // Hide all contents
         document.querySelectorAll('.tab-content').forEach(function(content) {
@@ -74,7 +73,26 @@
         // Add active class to the clicked tab
         const activeTab = document.querySelector(`[onclick="showContent('${contentId}')"]`);
         activeTab.classList.add('tab-active');
+
+        // Update the URL with the hash of the selected tab
+        window.location.hash = contentId;
     }
+
+    // Function to activate the correct tab based on the URL hash
+    function activateTabFromURL() {
+        const hash = window.location.hash.substring(1);  // Get the hash value without the '#'
+        if (hash) {
+            // Check if the content exists for the hash
+            if (document.getElementById(hash)) {
+                showContent(hash);  // Activate the corresponding tab
+            }
+        } else {
+            showContent('base-knowledge');  // Default to the first tab if no hash is present
+        }
+    }
+
+    // Run this function when the page loads to activate the correct tab
+    window.onload = activateTabFromURL;
 </script>
 <!-- Alpine.js File Upload Handler -->
 <script>

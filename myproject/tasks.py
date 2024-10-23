@@ -9,6 +9,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct
 from qdrant_client.models import Distance, VectorParams
 from dotenv import load_dotenv, find_dotenv
+from langchain_community.document_loaders import UnstructuredPDFLoader
 
 from celery import shared_task
 from .models import UserFile
@@ -32,10 +33,9 @@ def process_uploaded_file(user_file_id):
 
         # Process the file (e.g., generate embeddings, store in Qdrant, etc.)
         file_path = user_file.file.path
-        loader = PyPDFLoader(file_path)
+        loader = UnstructuredPDFLoader(file_path)
 
         all_pages = loader.load()
-        file_to_pages_map = [user_file.file.name] * len(all_pages)  # Associate each page with the file name
 
         # Apply cleaning to each page's content while preserving the document structure
         for page in all_pages:
@@ -43,10 +43,7 @@ def process_uploaded_file(user_file_id):
 
         # Use a more advanced text splitter that respects paragraphs or semantic boundaries
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len,
-            separators=["\n\n", "\n", ".", "!", "?"]  # Prioritize splitting on sentences and paragraphs
+            chunk_size=1000, chunk_overlap=250
         )
 
         docs = []

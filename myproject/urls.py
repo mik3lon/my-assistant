@@ -3,6 +3,7 @@ from . import upload_files
 from . import my_assistant
 from . import index
 from . import serve_file
+from . import conversation
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -18,6 +19,7 @@ urlpatterns = [
     path('interact', interact, name='interacts'),
     path('delete-file/<int:file_id>/', delete_file, name='delete_file'),
     path('media/file/<int:file_id>/', serve_file.serve_protected_file, name='serve_protected_file'),
+    path('conversation/<uuid:conversation_id>/', conversation.get_conversation, name='get_conversation'),
 
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('allauth.socialaccount.urls')),

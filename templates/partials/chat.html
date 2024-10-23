@@ -1,22 +1,61 @@
-<div class="rounded-lg p-4"> <!-- Darker border added -->
-    <h2 class="text-lg font-semibold mb-2 text-left">Chat with my files</h2>
-    <!-- Chat Messages -->
-    <div id="chat-messages" class="flex-1 p-4 overflow-y-auto">
-        <div class="mb-4"><div class="bg-gray-200 rounded-md p-3 w-fit max-w-xl">Hola, soy tu asistente, en que te puedo ayudar?</div></div>
+<div class="flex h-[100vh]">
+    <!-- Left Sidebar for Conversations -->
+    <div class="w-1/4 p-4 bg-gray-100 rounded-lg shadow-lg mr-4">
+        <h3 class="text-lg font-semibold mb-2">Your Conversations</h3>
+        <!-- Scrollable conversation list with max height -->
+        <ul id="conversation-list" class="space-y-2 overflow-y-auto">
+            {% for conversation in conversations %}
+                <li class="relative">
+                    <a href="#" class="block p-2 bg-white hover:bg-gray-200 rounded-md p-4" data-conversation-id="{{ conversation.id }}">
+                        <!-- Topic with 100 characters limit -->
+                        <div>{{ conversation.topic|slice:":100" }}{% if conversation.topic|length > 100 %}...{% endif %}</div>
+                        <!-- Created at, positioned at the bottom-right -->
+                        <div class="text-xs text-gray-500 absolute bottom-2 right-2 pt-6">
+                            {{ conversation.created_at|date:"M d, Y" }}
+                        </div>
+                    </a>
+                </li>
+            {% empty %}
+                <li class="text-gray-500">No conversations available</li>
+            {% endfor %}
+        </ul>
     </div>
 
-    <!-- Input Area Fixed at the Bottom -->
-    <div class="p-4 sticky bottom-0 bg-white">
-        <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 shadow-lg">
-            <!-- User Input -->
-            <input id="chat-input" type="text" placeholder="Envía un mensaje a ChatGPT" class="flex-1 bg-transparent focus:outline-none text-gray-800 placeholder-gray-500">
-            <!-- Send Button -->
-            <button id="send-button" class="ml-4 p-2 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition duration-200">
-                <i class="fas fa-arrow-up"></i>
-            </button>
+    <!-- Chat View (Modified to take 3/4 of the width) -->
+    <div class="w-3/4 rounded-lg p-4 bg-white shadow-lg flex flex-col">
+        <h2 class="text-lg font-semibold mb-2 text-left">Chat with my files</h2>
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto">
+            {% if selected_conversation %}
+                {% for message in messages %}
+                    <div class="mb-4">
+                        {% if message.sender == 'user' %}
+                            <div class="bg-blue-600 text-white rounded-md p-3 w-fit max-w-xl ml-auto">{{ message.content }}</div>
+                        {% else %}
+                            <div class="bg-gray-200 rounded-md p-3 w-fit max-w-xl">{{ message.content }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="bg-gray-200 rounded-md p-3 w-fit max-w-xl">Hola, soy tu asistente, en que te puedo ayudar?</div>
+            {% endif %}
+        </div>
+
+        <!-- Input Area Fixed at the Bottom -->
+        <div class="bg-white">
+            <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 shadow-lg">
+                <!-- User Input -->
+                <input id="chat-input" type="text" placeholder="Envía un mensaje a ChatGPT" class="flex-1 bg-transparent focus:outline-none text-gray-800 placeholder-gray-500">
+                <!-- Send Button -->
+                <button id="send-button" class="ml-4 p-2 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition duration-200">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
 
 <script>
     let conversationId = null; // Initialize conversationId as null
@@ -99,5 +138,46 @@
         const name = 'csrftoken';
         const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
         return cookieValue ? cookieValue.split('=')[1] : '';
+    }
+
+    document.querySelectorAll('#conversation-list a').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Get the conversation ID from the clicked link
+            const selectedConversationId = this.getAttribute('data-conversation-id');
+
+            // Update the conversation ID in the URL without reloading the page
+            const url = new URL(window.location);
+            url.searchParams.set('conversation_id', selectedConversationId);
+            window.history.pushState({}, '', url);
+
+            // Set the global conversationId variable
+            conversationId = selectedConversationId;
+
+            // Load the messages for the selected conversation
+            loadConversationMessages(selectedConversationId);
+        });
+    });
+
+    function loadConversationMessages(conversationId) {
+        fetch(`/conversation/${conversationId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = '';  // Clear current messages
+
+                // Add each message to the chat
+                data.messages.forEach(message => {
+                    const sender = message.sender === 'user' ? 'user' : 'ai';
+                    addMessageToChat(message.content, sender);
+                });
+
+                // Scroll to the bottom of the chat
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error loading conversation messages:', error);
+            });
     }
 </script>

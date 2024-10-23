@@ -1,6 +1,7 @@
 import json
 import os
 
+import openai
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from dotenv import load_dotenv, find_dotenv
@@ -19,6 +20,7 @@ _ = load_dotenv(find_dotenv())
 
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 qdrant_client = QdrantClient("localhost", port=6333)  # Adjust to your Qdrant configuration
+
 
 @login_required
 def interact(request):
@@ -41,7 +43,8 @@ def interact(request):
                     return JsonResponse({'error': 'Conversation not found'}, status=404)
             else:
                 # Create a new conversation
-                conversation = Conversation.objects.create(user=request.user)
+                topic = summarize_message(question)
+                conversation = Conversation.objects.create(user=request.user, topic=topic)
 
             # Retrieve previous messages as chat history for the conversation
             chat_history = [
@@ -77,8 +80,10 @@ def interact(request):
             qa_system_prompt = """You are an assistant for question-answering tasks. \
             Use the following pieces of retrieved context to answer the question. \
             If you don't know the answer, just say that you don't know. \
-            Use five sentences maximum and keep the answer concise. \
-            You should return the reference of the data or the documentation.
+            If the information provided is ambiguous or incomplete, state this clearly. \
+            Synthesize information from the provided context, but do not make assumptions beyond what is given. \
+            Return the reference or link to the data or documentation in parentheses after the answer. \
+            If more information is available and relevant, offer the user an option to request a more detailed answer.
         
             {context}"""
 
@@ -114,3 +119,14 @@ def interact(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+def summarize_message(message):
+    chat = ChatOpenAI(temperature=0, openai_api_key=os.environ['OPENAI_API_KEY'])  # Usa temperature=0 para respuestas deterministas
+    messages = [
+        HumanMessage(content=f"Please, summarize the concept of this message.Return in the same language. Don't answer it, just interpret what is asking: {message}")
+    ]
+    response = chat(messages)
+
+    summary = response.content.strip()
+    return summary

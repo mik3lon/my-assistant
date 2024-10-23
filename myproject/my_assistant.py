@@ -5,7 +5,7 @@ from django.shortcuts import render
 from dotenv import load_dotenv, find_dotenv
 from qdrant_client import QdrantClient
 
-from myproject.models import UserFile
+from myproject.models import UserFile, Conversation
 
 # Load environment variables
 _ = load_dotenv(find_dotenv())
@@ -17,4 +17,12 @@ qdrant_client = QdrantClient("localhost", port=6333)  # Adjust to your Qdrant co
 @login_required
 def my_assistant(request):
     user_files = UserFile.objects.filter(user=request.user)
-    return render(request, 'my_assistant.html', {'user_files': user_files})
+    conversations = Conversation.objects.filter(user=request.user).order_by('-created_at')
+    return render(
+        request,
+        'my_assistant.html',
+        {
+            'user_files': user_files,
+            'conversations': conversations,
+        }
+    )
