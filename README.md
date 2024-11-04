@@ -12,6 +12,18 @@ This application allows users to upload PDF documents, process their content usi
 - **AI Chat Interaction**: Engage with an AI-powered chatbot to query the content of the PDFs.
 - **Task Management**: Use Celery and Redis to handle PDF processing asynchronously.
 
+## Screenshots
+
+### Chat Interface
+Interact with the AI chatbot to ask questions about your uploaded PDFs.
+
+![Chat Screenshot](docs/images/chat.png)
+
+### File Upload
+Upload your PDFs easily through the user-friendly interface.
+
+![File Upload Screenshot](docs/images/my_knowledge.png)
+
 ## Technology Stack
 - **Backend**: Python with Django for handling views and requests.
 - **AI Model**: Leverages advanced NLP models for embedding extraction and question answering.
@@ -36,19 +48,19 @@ This application allows users to upload PDF documents, process their content usi
 
 2. **Set Up Python Environment**:
     ```bash
-    python -m venv venv
+    python3 -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     pip install -r requirements.txt
     ```
 
 3. **Run Docker Services**:
     ```bash
-    docker-compose up -d
+    make up
     ```
 
 4. **Apply Migrations**:
     ```bash
-    python manage.py migrate
+    make django-migrate
     ```
 
 5. **Configure Google OAuth**:
@@ -66,7 +78,7 @@ This application allows users to upload PDF documents, process their content usi
 
 6. **Start Django Server**:
     ```bash
-    python manage.py runserver
+    make django-run
     ```
 
 7. **Start Celery Worker**:
