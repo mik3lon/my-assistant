@@ -39,7 +39,7 @@
     {% include 'partials/messages.html' with messages=messages %}
 
     <!-- Content area -->
-    <div class="p-6 mt-8 ">
+    <div>
         <div id="base-knowledge" class="tab-content">
             <div class="w-full flex space-x-8">
                 {% include 'partials/file_list.html' with user_files=user_files %}
@@ -48,9 +48,7 @@
         </div>
 
         <div id="chat" class="tab-content hidden">
-            <div class="w-full h-[70vh] flex flex-col"> <!-- 80% of viewport height and flex for layout -->
-                {% include 'partials/chat.html' with conversations=conversations %}
-            </div>
+            {% include 'partials/chat.html' with conversations=conversations %}
         </div>
     </div>
 </div>

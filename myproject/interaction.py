@@ -1,7 +1,6 @@
 import json
 import os
 
-import openai
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from dotenv import load_dotenv, find_dotenv
@@ -13,6 +12,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from qdrant_client import QdrantClient
+
 from .models import Conversation, Message  # Import the models
 
 # Load environment variables
@@ -43,8 +43,7 @@ def interact(request):
                     return JsonResponse({'error': 'Conversation not found'}, status=404)
             else:
                 # Create a new conversation
-                topic = summarize_message(question)
-                conversation = Conversation.objects.create(user=request.user, topic=topic)
+                conversation = Conversation.objects.create(user=request.user, topic=question)
 
             # Retrieve previous messages as chat history for the conversation
             chat_history = [
@@ -119,14 +118,3 @@ def interact(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
-
-def summarize_message(message):
-    chat = ChatOpenAI(temperature=0, openai_api_key=os.environ['OPENAI_API_KEY'])  # Usa temperature=0 para respuestas deterministas
-    messages = [
-        HumanMessage(content=f"Please, summarize the concept of this message.Return in the same language. Don't answer it, just interpret what is asking: {message}")
-    ]
-    response = chat(messages)
-
-    summary = response.content.strip()
-    return summary

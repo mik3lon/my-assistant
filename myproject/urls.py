@@ -4,6 +4,7 @@ from . import my_assistant
 from . import index
 from . import serve_file
 from . import conversation
+from . import delete_conversation
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -20,6 +21,7 @@ urlpatterns = [
     path('delete-file/<int:file_id>/', delete_file, name='delete_file'),
     path('media/file/<int:file_id>/', serve_file.serve_protected_file, name='serve_protected_file'),
     path('conversation/<uuid:conversation_id>/', conversation.get_conversation, name='get_conversation'),
+    path('delete-conversation/<uuid:conversation_id>/', delete_conversation.delete_conversation, name='delete_conversation'),
 
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('allauth.socialaccount.urls')),
